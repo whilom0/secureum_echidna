@@ -107,7 +107,6 @@ function avg_gavg () {
   // avg(x, -x) = 0
   // Average of x,y should be between x,y min(x,y) <= avg(x,y) <= max(x,y)
 
-  // --------------- TODO: ------------------
   // gavg(x,y) = gavg(y,x)
   // gavg(x,x) = x
   // gavg(x,y) <= avg(x,y)

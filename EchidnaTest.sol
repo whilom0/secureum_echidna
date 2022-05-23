@@ -459,6 +459,23 @@ contract Test {
         assert(low <= avgRes && avgRes <= high);
     }
 
+    function test_gavg(int128 x, int128 y) public {
+        x = abs(x);
+        y = abs(y);
+
+        assert(gavg(x, y) == gavg(y, x));
+        assert(gavg(x, x) == x);
+        assert(gavg(x, y) <= avg(x, y));
+    }
+
+    function test_gavg_err(int128 x, int128 y) public {
+        try this.gavg(x, y) {} catch {
+            // Throws an error if x*y < 0 which can only happen if
+            // x < 0 or y < 0
+            assert(x < 0 || y < 0);
+        }
+    }
+
     function test_muli_mulu_eq(int128 x, int256 y) public {
         uint256 yPos = y > 0 ? uint256(y) : uint256(-y);
 
