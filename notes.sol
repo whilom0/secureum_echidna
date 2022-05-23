@@ -34,17 +34,16 @@ function test() {
 }
 
 
-// function add_subtract (int128 x, int128 y) internal pure returns (int128) {
-//   // If y > 0, x + y >= x
-//   // If y < 0, x + y <= x
-//   // If y = 0, x + y = x
+function add_subtract (int128 x, int128 y) internal pure returns (int128) {
+  // If y > 0, x + y >= x
+  // If y < 0, x + y <= x
+  // If y = 0, x + y = x
 
-//   // Communicative: x + y = y + x
-//   // Associative: (x + y) + z = x + (y + z)
-//   // Identity: x + y = x
-// }
+  // Communicative: x + y = y + x
+  // Associative: (x + y) + z = x + (y + z)
+  // Identity: x + y = x
+}
 
-// TODO:
 function mul_div (int128 x, int128 y) internal pure returns (int128) {
   // ------------- DONE ---------------
   // Identity: x * ONE = x
@@ -67,7 +66,10 @@ function mul_div (int128 x, int128 y) internal pure returns (int128) {
 // TODO:
 function muli_mulu_divi_divu (int128 x, int128 y) internal pure returns (int128) {
 
+  // --------------- FINISHED ------------------
   //  muli(x,y) =- mulu(x,y) * -1 if y < 0, else equal
+
+  // --------------- TODO: ------------------
   //  mulu(x, 1) = 0 if x < ONE else > 0
   //  mulu(ONE, y) = y -- same with mulu
   //  mulu(x, 0) = 0 -- same with mulu
@@ -82,29 +84,30 @@ function muli_mulu_divi_divu (int128 x, int128 y) internal pure returns (int128)
 }
 // TODO:
 function neg_abs_inv () {
+
+  // --------------- FINISHED ------------------
   // neg(x) < x if x is posiive
   // neg(x) > x if x is negative
   // neg(neg(x)) = x
-  // Check that it reverts on MIN_64x64 or greater
+  // Check that it reverts on MIN_64x64
 
   // abs(x) = x if x is positive
   // abs(x) = neg(x) otherwise
   // Check that it reverts on MIN_64x64 or greater
-
   // inv(inv(x)) = x
   // inv(ONE) = ONE
   // Check 0 reverts
-  // If x > 2^64, then should 
-
 }
 // TODO:
 function avg_gavg () {
 
+  // --------------- FINISHED ------------------
   // avg(x. x) = x
   // avg(x,y) = avg(y,x)
   // avg(x, -x) = 0
   // Average of x,y should be between x,y min(x,y) <= avg(x,y) <= max(x,y)
 
+  // --------------- TODO: ------------------
   // gavg(x,y) = gavg(y,x)
   // gavg(x,x) = x
   // gavg(x,y) <= avg(x,y)

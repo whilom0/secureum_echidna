@@ -15,7 +15,7 @@ contract Test {
     int128 private constant maxFixedSub =
         -85070591730234615865843651857942052863;
 
-    // One in decimal (1 << 64)
+    // One in decimal 2^64
     int128 private constant ONE = 18446744073709551616;
 
     //  -2^127
@@ -51,6 +51,10 @@ contract Test {
 
     function muli(int128 x, int256 y) public returns (int256) {
         return ABDKMath64x64.muli(x, y);
+    }
+
+    function mulu(int128 x, uint256 y) public returns (uint256) {
+        return ABDKMath64x64.mulu(x, y);
     }
 
     function div(int128 x, int128 y) public returns (int128) {
@@ -297,6 +301,8 @@ contract Test {
     function test_mul_outputs(int128 x, int128 y) public {
         int128 mulRes = mul(x, y);
 
+        emit Value("mulRes", mulRes);
+
         if (y == 0 || x == 0) {
             // Zero property
             assert(mulRes == 0);
@@ -311,20 +317,20 @@ contract Test {
             if (y >= ONE) {
                 assert(x <= mulRes);
             } else {
-                assert(x > mulRes);
+                assert(x >= mulRes);
             }
         } else if (x < 0 && y > 0) {
             // x > xy if x,y > ONE
             if (y >= ONE) {
                 assert(x >= mulRes);
             } else {
-                assert(x < mulRes);
+                assert(x <= mulRes);
             }
         }
     }
 
     function test_mul_reverts(int128 x, int128 y) public {
-        try this.mul(x, y) returns (int128 mulRes) {} catch {
+        try this.mul(x, y) {} catch {
             if (y > 0) {
                 // x <= MAX/y when y is positive
                 // x >= MIN/y when y is positive
@@ -355,16 +361,16 @@ contract Test {
         } else if (x < 0 && y < 0) {
             assert(x < divRes);
         } else if (x > 0 && y > 0) {
-            if (y < ONE) {
-                assert(x < divRes);
+            if (y <= ONE) {
+                assert(x <= divRes);
             } else {
-                assert(x > divRes);
+                assert(x >= divRes);
             }
         } else if (x < 0 && y > 0) {
-            if (y < ONE) {
-                assert(x > divRes);
+            if (y <= ONE) {
+                assert(x >= divRes);
             } else {
-                assert(x < divRes);
+                assert(x <= divRes);
             }
         }
     }
@@ -381,4 +387,97 @@ contract Test {
             assert(divideByZero || overflow || underflow);
         }
     }
+
+    function test_double_neg(int128 x) public {
+        assert(neg(neg(x)) == x);
+    }
+
+    function test_neg(int128 x) public {
+        try this.neg(x) returns (int128 negRes) {
+            assert(
+                (negRes > 0 && x < 0) ||
+                    (negRes < 0 && x > 0) ||
+                    (negRes == 0 && x == 0)
+            );
+        } catch {
+            assert(x == MIN_64x64);
+        }
+    }
+
+    function test_abs(int128 x) public {
+        try this.abs(x) returns (int128 absRes) {
+            assert(absRes >= 0);
+            assert(
+                (absRes == x && x > 0) ||
+                    (absRes == -x && x < 0) ||
+                    (absRes == 0 && x == 0)
+            );
+        } catch {
+            assert(x == MIN_64x64);
+        }
+    }
+
+    function test_double_inv(int128 x) public {
+        // Inner inv can truncate which results in smaller number
+        // thus second inv will make the absolute value bigger
+        if (x > 0) {
+            assert(x <= inv(inv(x)));
+        } else {
+            assert(x >= inv(inv(x)));
+        }
+    }
+
+    // TODO:
+    // function test_inv(int128 x) public {
+    //     x = 1;
+    //     try this.inv(x) returns (int128 invRes) {
+    //         if (x == ONE) {
+    //             assert(invRes == ONE);
+    //         }
+    //     } catch {
+    //         emit Value("mul(MAX_64x64, x)", mul(MAX_64x64, x));
+    //         emit Value("x", x);
+    //         assert(
+    //             // 1/x > MAX -> 1 > MAX * x
+    //             x == 0 ||
+    //                 (x > 0 && 1 > mul(MAX_64x64, x) && x < ONE) ||
+    //                 (x < 0 && 1 < mul(MIN_64x64, x) && x > -ONE)
+    //         );
+    //     }
+    // }
+
+    function test_avg(int128 x, int128 y) public {
+        assert(avg(x, x) == x);
+        assert(avg(x, y) == avg(y, x));
+        assert(avg(x, -x) == 0);
+
+        int128 avgRes = avg(x, y);
+        int128 low = x < y ? x : y;
+        int128 high = x > y ? x : y;
+
+        // Average of x,y should be between x,y min(x,y) <= avg(x,y) <= max(x,y)
+        assert(low <= avgRes && avgRes <= high);
+    }
+
+    function test_muli_mulu_eq(int128 x, int256 y) public {
+        uint256 yPos = y > 0 ? uint256(y) : uint256(-y);
+
+        if (y < 0) {
+            assert(muli(x, y) == -int256(mulu(x, yPos)));
+        } else {
+            assert(muli(x, y) == int256(mulu(x, yPos)));
+        }
+    }
+
+    // TODO: Figure out how to do this
+    // function test_muli_one(int128 x) public {
+    //     emit Value("muli(x, 1)", int128(muli(x, 1)));
+    //     emit Value("toInt(x)", toInt(x));
+    //     emit Value("x", x);
+    //     if (x >= ONE || x <= -ONE) {
+    //         assert(muli(x, 1) == toInt(x));
+    //     } else {
+    //         assert(muli(x, 1) == 0);
+    //     }
+    // }
 }
