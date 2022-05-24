@@ -7,14 +7,6 @@ contract Test {
     int128 internal zero = ABDKMath64x64.fromInt(0);
     int128 internal one = ABDKMath64x64.fromInt(1);
 
-    // (2^127-1) / 2 rounded down
-    int128 private constant maxFixedAdd =
-        85070591730234615865843651857942052863;
-
-    // (-2^127-1) / 2 rounded down
-    int128 private constant maxFixedSub =
-        -85070591730234615865843651857942052863;
-
     // One in decimal 2^64
     int128 private constant ONE = 18446744073709551616;
 
@@ -576,6 +568,45 @@ contract Test {
         assert(sqrt(mul(x, x)) <= x);
         // // sqrt(x) * sqrt(x) <= x with some margin
         assert(mul(sqrt(x), sqrt(x)) <= x);
+    }
+
+    function test_from_int(int256 x) public {
+        assert(-fromInt(-x) == fromInt(x));
+
+        assert(toInt(fromInt(x)) == x);
+    }
+
+    function test_toInt(int128 x) public {
+        int64 res = toInt(x);
+        emit Value("toInt(x)", int128(res));
+        if (x < -ONE) {
+            assert(res < 0);
+        } else if (x > ONE) {
+            assert(res > 0);
+        }
+
+        emit Value("toInt(-x)", int128(toInt(-x)));
+        assert(toInt(x) + toInt(-x) <= 1);
+
+        // toInt loses precision but rounds down
+        assert(fromInt(toInt(x)) <= x);
+    }
+
+    function test_toUint(int128 x) public {
+        emit Value("toUInt(x)", int128(uint128(toUInt(x))));
+        try this.toUInt(x) returns (uint64 ret) {
+            assert(ret >= 1 == x >= ONE);
+        } catch {
+            assert(x < 0);
+        }
+    }
+
+    function test_from128x128(int256 x) public {
+        assert(to128x128(from128x128(x)) <= x);
+    }
+
+    function test_to128x128(int128 x) public {
+        assert(from128x128(to128x128(x)) == x);
     }
 
     // TODO: Figure out how to do this

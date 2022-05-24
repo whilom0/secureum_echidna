@@ -156,22 +156,21 @@ function log_2_ln_exp_2_exp () {
 }
 // TODO:
 function conversions () {
-  // fromInt/fromUint (x) -- essentially x * 256 
-  // - fromInt(-x) = -fromInt(x)
 
+  // --------------- FINISHED ------------------
+  // - fromInt(-x) = -fromInt(x)
   // toInt / toUint(x) 
   // - toInt(ONE) = 1
-  // - If less than zero, rounds to zero: x < 2^64 = 0
-  
+
   // toInt(fromInt(x)) = x -- Should have no loss in precision
   // fromInt(toInt(x)) <= x -- toInt loses precision but rounds down
-  // fromInt(toInt(x)) <= 2^64 -- Bound the loss of precision to ONE
   // toUint reverts on negative number
 
   // from128x128, to128x128
-  // to128x128(from128x128(x)) <= x -- Potential loss of precision
   // from128x128(to128x128(x)) = x -- No loss in precision
-  // TODO: Bounded loss of precision 
+  // to128x128(from128x128(x)) <= x -- Potential loss of precision
+
+  // --------------- TODO: ------------------
 
   //  ------------------ One time checks -----------------
   // - Basic sanity checks (fromInt(0) = 0)

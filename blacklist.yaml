@@ -28,4 +28,5 @@ filterFunctions:
     "Test.muli(int128,int256)",
     "Test.avg(int128,int128)",
     "Test.abs_greater_than(int128,int128)",
+    "Test.mulu(int128,uint256)",
   ]
