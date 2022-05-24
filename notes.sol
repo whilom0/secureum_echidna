@@ -68,21 +68,22 @@ function muli_mulu_divi_divu (int128 x, int128 y) internal pure returns (int128)
 
   // --------------- FINISHED ------------------
   //  muli(x,y) =- mulu(x,y) * -1 if y < 0, else equal
-
-  // --------------- TODO: ------------------
   //  mulu(x, 1) = 0 if x < ONE else > 0
   //  mulu(ONE, y) = y -- same with mulu
   //  mulu(x, 0) = 0 -- same with mulu
-  //  mulu(x, y) > y (always) -- negative option for muli
+  //  mulu(x, y) > x (if x > 0) -- negative option for muli
+
+  // divi(x,1) = x
+  // divu(x,1) = x
+  // --------------- TODO: ------------------
 
   // Special edge case handling for negative because range is bigger
   // muli and mulu have these special cases
 
-  // divi(x,1) = x
-  // divu(x,1) = x
 
 }
-// TODO:
+
+
 function neg_abs_inv () {
 
   // --------------- FINISHED ------------------
@@ -154,7 +155,8 @@ function log_2_ln_exp_2_exp () {
   // log_2(pow(2, x)) <= x -- with some allocation for error
   // ln(exp(x)) = x
 }
-// TODO:
+
+
 function conversions () {
 
   // --------------- FINISHED ------------------

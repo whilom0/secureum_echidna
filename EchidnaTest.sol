@@ -20,6 +20,7 @@ contract Test {
     int128 private constant MAX_64x64 = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 
     event Value(string, int128);
+    event Value256(string, int256);
 
     function debug(string calldata x, int128 y) public {
         emit Value(x, ABDKMath64x64.toInt(y));
@@ -609,15 +610,65 @@ contract Test {
         assert(from128x128(to128x128(x)) == x);
     }
 
-    // TODO: Figure out how to do this
-    // function test_muli_one(int128 x) public {
-    //     emit Value("muli(x, 1)", int128(muli(x, 1)));
-    //     emit Value("toInt(x)", toInt(x));
-    //     emit Value("x", x);
-    //     if (x >= ONE || x <= -ONE) {
-    //         assert(muli(x, 1) == toInt(x));
-    //     } else {
-    //         assert(muli(x, 1) == 0);
-    //     }
-    // }
+    function test_muli_mulu_one_zero(int128 x) public {
+        // muli(x, 1) = x with some tolerance
+        emit Value("muli(x, 1)", int128(muli(x, 1)));
+        emit Value("toInt(x)", toInt(x));
+        emit Value("x", x);
+        if (x >= ONE || x <= -ONE) {
+            assert(muli(x, 1) - toInt(x) <= 1);
+            assert(mulu(x, 1) - toUInt(x) <= 1);
+        } else {
+            assert(muli(x, 1) == 0);
+            assert(mulu(x, 1) == 0);
+        }
+        assert(muli(x, 0) == 0);
+        assert(mulu(x, 0) == 0);
+    }
+
+    function test_muli_one_y(int256 y) public {
+        assert(muli(ONE, y) == y);
+    }
+
+    function test_mulu_one_y(uint256 y) public {
+        assert(mulu(ONE, y) == y);
+    }
+
+    function test_muli_gt(int128 x, int256 y) public {
+        int256 res = muli(x, y);
+        emit Value256("muli", res);
+        emit Value("toInt", toInt(x));
+        if (x >= 0) {
+            if (y > 0) {
+                assert(toInt(x) - res <= 1);
+            } else {
+                assert(res - toInt(x) <= 1);
+            }
+        } else {
+            if (y > 0) {
+                assert(res - toInt(x) <= 1);
+            } else {
+                assert(toInt(x) - res <= 1);
+            }
+        }
+    }
+
+    function test_divi_one(int256 x) public {
+        assert(divi(x, 1) == fromInt(x));
+    }
+
+    function test_divu_one(uint256 x) public {
+        assert(divu(x, 1) == fromUInt(x));
+    }
+
+    function mulu_divu(uint256 x, uint256 y) public {
+        // can truncate which makes this not strict equality
+        uint256 res = mulu(divu(x, y), y) - x;
+        assert(res < (1 << 128));
+        int256 diff = int256(res);
+
+        int256 tol = ONE;
+
+        assert(-tol <= diff && diff <= tol);
+    }
 }
