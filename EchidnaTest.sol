@@ -427,24 +427,21 @@ contract Test {
         }
     }
 
-    // TODO:
-    // function test_inv(int128 x) public {
-    //     x = 1;
-    //     try this.inv(x) returns (int128 invRes) {
-    //         if (x == ONE) {
-    //             assert(invRes == ONE);
-    //         }
-    //     } catch {
-    //         emit Value("mul(MAX_64x64, x)", mul(MAX_64x64, x));
-    //         emit Value("x", x);
-    //         assert(
-    //             // 1/x > MAX -> 1 > MAX * x
-    //             x == 0 ||
-    //                 (x > 0 && 1 > mul(MAX_64x64, x) && x < ONE) ||
-    //                 (x < 0 && 1 < mul(MIN_64x64, x) && x > -ONE)
-    //         );
-    //     }
-    // }
+    function test_inv(int128 x) public {
+        try this.inv(x) returns (int128 invRes) {
+            if (x == ONE) {
+                assert(invRes == ONE);
+            }
+        } catch {
+            emit Value("mul(MAX_64x64, x)", mul(MAX_64x64, x));
+            emit Value("x", x);
+            assert(
+                // 1/x > MAX -> 1 > MAX * x
+                // TODO: Figure out how to express this with all the overflows
+                x == 0 || (x > 0 && x < ONE) || (x < 0 && x > -ONE)
+            );
+        }
+    }
 
     function test_avg(int128 x, int128 y) public {
         assert(avg(x, x) == x);
@@ -484,6 +481,101 @@ contract Test {
         } else {
             assert(muli(x, y) == int256(mulu(x, yPos)));
         }
+    }
+
+    function test_pow_identities(int128 x) public {
+        assert(pow(x, 0) == ONE);
+        assert(pow(x, 1) == x);
+    }
+
+    function test_pow_gt_one(int128 x, uint256 y) public {
+        int128 powRes = pow(x, y);
+        emit Value("powRes", powRes);
+        emit Value("x", x);
+
+        // 0^0 is 1
+        if (x == 0 && y == 0) {
+            assert(powRes == ONE);
+        }
+        // 0 ^ y = 0
+        else if (x == 0) {
+            assert(pow(0, y) == 0);
+        }
+        // x ^ 0 == 1
+        else if (y == 0) {
+            assert(pow(x, y) == ONE);
+        }
+        // x ^ 1 == x
+        else if (y == 1) {
+            assert(pow(x, y) == x);
+        }
+        //  x is positive
+        else if (x > 0) {
+            // pow(x, n) > x if x is >= ONE
+            if (x < ONE) assert(powRes <= x);
+            else if (x == ONE) assert(powRes == x);
+            else assert(powRes >= x);
+        }
+        // x is negative
+        else if (x < 0) {
+            bool yEven = y % 2 == 0;
+            if (yEven) {
+                // TODO: This is an incomplete test.. Checking if > -ONE limits the test
+                // x ^ (even) > x where x is negative
+                assert(powRes > x || x > -ONE);
+            } else {
+                if (x > -ONE) assert(powRes >= x);
+                else if (x == ONE) assert(powRes == x);
+                else assert(powRes <= x);
+            }
+        }
+    }
+
+    function test_pow_math_props(
+        int128 x,
+        uint256 y,
+        uint256 z
+    ) public {
+        // Law of Product: a^m × a^n = a^(m+n)
+        assert(mul(pow(x, y), pow(x, z)) == pow(x, y + z));
+
+        // Law of Quotient: a^m/a^n = a^(m-n)
+        assert(div(pow(x, y), pow(x, z)) == pow(x, y - z));
+
+        // Law of Power of a Power: (a^m)^n = a^(mn)
+        assert(pow(pow(x, y), z) == pow(x, y * z));
+    }
+
+    function test_pow_math_props2(
+        int128 a,
+        int128 b,
+        uint256 m
+    ) public {
+        // Law of Power of a Product: (ab)^m = a^m b^m
+        assert(pow(mul(a, b), m) == mul(pow(a, m), pow(b, m)));
+
+        // Law of Power of a Quotient: (a/b)^m = a^m/b^m
+        assert(pow(div(a, b), m) == div(pow(a, m), pow(b, m)));
+    }
+
+    function test_pow(int128 x, uint256 y) public {
+        try this.pow(x, y) {} catch {
+            // TODO: Check either it is less than zero or overflows
+            // assert(x < 0);
+        }
+    }
+
+    function test_sqrt_math(int128 x, int128 y) public {
+        emit Value("x", x);
+        emit Value("sqrt(mul(x, x))", sqrt(mul(x, x)));
+        emit Value("mul(sqrt(x), sqrt(x))", mul(sqrt(x), sqrt(x)));
+        emit Value("sqrt(mul(x, y))", sqrt(mul(x, y)));
+        emit Value("mul(sqrt(x), sqrt(y))", mul(sqrt(x), sqrt(y)));
+
+        // sqrt(x * x) <= x because x * x can truncate
+        assert(sqrt(mul(x, x)) <= x);
+        // // sqrt(x) * sqrt(x) <= x with some margin
+        assert(mul(sqrt(x), sqrt(x)) <= x);
     }
 
     // TODO: Figure out how to do this

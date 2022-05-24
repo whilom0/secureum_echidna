@@ -98,7 +98,7 @@ function neg_abs_inv () {
   // inv(ONE) = ONE
   // Check 0 reverts
 }
-// TODO:
+
 function avg_gavg () {
 
   // --------------- FINISHED ------------------
@@ -112,27 +112,32 @@ function avg_gavg () {
   // gavg(x,y) <= avg(x,y)
   // Should throw an error if x*y < 0
 }
-// TODO:
+
 function pow_sqrt () {
 
+  // --------------- FINISHED ------------------
   // pow(x, 0) = 1
   // pow(x, 1) = x
-  // Check for infinite loop / if it terminates
   // pov(x,y) if x is negative, y is evem, results in x positive, else negative
   // pow(x, n) > x if x is >= ONE else <= ONE
 
   // Law of Product: am × an = am+n
   // Law of Quotient: am/an = am-n
   // Law of Zero Exponent: a0 = 1
-  // Law of Negative Exponent: a-m = 1/am
   // Law of Power of a Power: (am)n = amn
   // Law of Power of a Product: (ab)m = ambm
   // Law of Power of a Quotient: (a/b)m = am/bm
 
-  // sqrt(x) should throw error if x <= 0
   // sqrt(x * x) = x
-  // sqrt(a *b) = sqrt(a) * sqrt(b) 
   // sqrt(x) * sqrt(x) <= x with some margin
+  // sqrt(x) should throw error if x <= 0
+
+  // --------------- TODO: ------------------
+  // sqrt(a *b) = sqrt(a) * sqrt(b) -- Couldnt figure out tol
+  // Law of Negative Exponent: a-m = 1/am -- Hard to implement due to inv
+
+  // ----------------- Out of scope ----------------
+  // Check for infinite loop / if it terminates
 
 }
 // TODO:
