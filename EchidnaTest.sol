@@ -740,4 +740,42 @@ contract Test {
         emit Value("fromInt(x)", fromInt(x));
         assert(fromInt(x) - ln(exp(fromInt(x))) < ONE);
     }
+
+    function test_ln_error(int128 x) public {
+        try this.ln(x) {} catch {
+            require(x <= 0);
+        }
+    }
+
+    function test_log_2_error(int128 x) public {
+        try this.log_2(x) {} catch {
+            require(x <= 0);
+        }
+    }
+
+    function test_exp_overflow(int128 x) public {
+        try this.exp(x) {} catch {
+            require(x >= ln(MAX_64x64));
+        }
+    }
+
+    function test_exp_2_overflow(int128 x) public {
+        try this.exp_2(x) {} catch {
+            require(x >= log_2(MAX_64x64));
+        }
+    }
+
+    function test_log_2_math(int128 x, int128 y) public {
+        emit Value("log_2(mul(x, y))", log_2(mul(x, y)));
+        emit Value("add(log_2(x), log_2(y))", add(log_2(x), log_2(y)));
+        assert(add(log_2(x), log_2(y)) - log_2(mul(x, y)) < ONE);
+        assert(sub(log_2(x), log_2(y)) - log_2(div(x, y)) < ONE);
+    }
+
+    function test_ln_math(int128 x, int128 y) public {
+        emit Value("ln(mul(x, y))", ln(mul(x, y)));
+        emit Value("add(ln(x), ln(y))", add(ln(x), ln(y)));
+        assert(add(ln(x), ln(y)) - ln(mul(x, y)) < ONE);
+        assert(sub(ln(x), ln(y)) - ln(div(x, y)) < ONE);
+    }
 }

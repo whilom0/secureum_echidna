@@ -151,9 +151,9 @@ function log_2_ln_exp_2_exp () {
   // 2^x <= e^x <= 3^x 
   // log_2(pow(2, x)) <= x -- with some allocation for error
   // ln(exp(x)) = x
+  // Add the try catch for overflow and underflow
 
   // --------------- TODO: ------------------
-  // Add the try catch for overflow and underflow
   
   // Insert the logarithm math rules here
 
