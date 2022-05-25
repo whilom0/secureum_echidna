@@ -142,19 +142,21 @@ function pow_sqrt () {
   // Check for infinite loop / if it terminates
 
 }
-// TODO:
-function log_2_ln_exp_2_exp () {
-// TODO:
 
+function log_2_ln_exp_2_exp () {
+  // --------------- FINISHED ------------------
   // exp(x) follows all the checks of pow(x)
   // exp_2(x) follows the same rules as pow(x)
   // 1-x <= e^x <= 1-x + x^2/2 where x < 0 
   // 2^x <= e^x <= 3^x 
+  // log_2(pow(2, x)) <= x -- with some allocation for error
+  // ln(exp(x)) = x
+
+  // --------------- TODO: ------------------
+  // Add the try catch for overflow and underflow
   
   // Insert the logarithm math rules here
 
-  // log_2(pow(2, x)) <= x -- with some allocation for error
-  // ln(exp(x)) = x
 }
 
 

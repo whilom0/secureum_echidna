@@ -173,7 +173,6 @@ contract Test {
     // Test Functions
     // -------------------------------------------
 
-
     function test_add_math_prop(
         int128 x,
         int128 y,
@@ -719,5 +718,26 @@ contract Test {
             inv(pow(ONE * 2, xPos)) <= inv(exp(x)) &&
                 inv(exp(x)) <= inv(pow(ONE * 3, xPos))
         );
+    }
+
+    function test_exp_2_pow_2(int128 x) public {
+        x = abs(x);
+        uint256 xPos = uint256(int256(x));
+        emit Value("exp_2(x)", exp_2(x));
+        emit Value("pow(ONE * 2, xPos)", pow(ONE * 2, xPos));
+        assert(exp_2(fromInt(x)) == pow(ONE * 2, xPos));
+    }
+
+    function test_log_2_exp_2(int128 x) public {
+        emit Value("exp_2(fromInt(x))", exp_2(fromInt(x)));
+        emit Value("log_2(exp_2(fromInt(x)))", log_2(exp_2(fromInt(x))));
+        assert(fromInt(x) - log_2(exp_2(fromInt(x))) < ONE);
+    }
+
+    function test_ln_exp(int128 x) public {
+        emit Value("exp(fromInt(x))", exp(fromInt(x)));
+        emit Value("ln(exp(fromInt(x)))", ln(exp(fromInt(x))));
+        emit Value("fromInt(x)", fromInt(x));
+        assert(fromInt(x) - ln(exp(fromInt(x))) < ONE);
     }
 }
