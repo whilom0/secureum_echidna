@@ -75,6 +75,7 @@ function muli_mulu_divi_divu (int128 x, int128 y) internal pure returns (int128)
 
   // divi(x,1) = x
   // divu(x,1) = x
+  // x/y * y = x
   // --------------- TODO: ------------------
 
   // Special edge case handling for negative because range is bigger
@@ -147,8 +148,8 @@ function log_2_ln_exp_2_exp () {
 
   // exp(x) follows all the checks of pow(x)
   // exp_2(x) follows the same rules as pow(x)
-  // 2^x < exp(x) < 3^x
   // 1-x <= e^x <= 1-x + x^2/2 where x < 0 
+  // 2^x <= e^x <= 3^x 
   
   // Insert the logarithm math rules here
 

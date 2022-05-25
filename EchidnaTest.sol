@@ -30,6 +30,11 @@ contract Test {
     // WRAPPER FUNCTIONS
     // -------------------------------------------
 
+    function toIntRoundToZero(int128 x) public returns (int64) {
+        if (x >= 0) return ABDKMath64x64.toInt(x);
+        else return -ABDKMath64x64.toInt(neg(x));
+    }
+
     function add(int128 x, int128 y) public returns (int128) {
         return ABDKMath64x64.add(x, y);
     }
@@ -167,6 +172,7 @@ contract Test {
     // -------------------------------------------
     // Test Functions
     // -------------------------------------------
+
 
     function test_add_math_prop(
         int128 x,
@@ -610,47 +616,12 @@ contract Test {
         assert(from128x128(to128x128(x)) == x);
     }
 
-    function test_muli_mulu_one_zero(int128 x) public {
-        // muli(x, 1) = x with some tolerance
-        emit Value("muli(x, 1)", int128(muli(x, 1)));
-        emit Value("toInt(x)", toInt(x));
-        emit Value("x", x);
-        if (x >= ONE || x <= -ONE) {
-            assert(muli(x, 1) - toInt(x) <= 1);
-            assert(mulu(x, 1) - toUInt(x) <= 1);
-        } else {
-            assert(muli(x, 1) == 0);
-            assert(mulu(x, 1) == 0);
-        }
-        assert(muli(x, 0) == 0);
-        assert(mulu(x, 0) == 0);
-    }
-
     function test_muli_one_y(int256 y) public {
         assert(muli(ONE, y) == y);
     }
 
     function test_mulu_one_y(uint256 y) public {
         assert(mulu(ONE, y) == y);
-    }
-
-    function test_muli_gt(int128 x, int256 y) public {
-        int256 res = muli(x, y);
-        emit Value256("muli", res);
-        emit Value("toInt", toInt(x));
-        if (x >= 0) {
-            if (y > 0) {
-                assert(toInt(x) - res <= 1);
-            } else {
-                assert(res - toInt(x) <= 1);
-            }
-        } else {
-            if (y > 0) {
-                assert(res - toInt(x) <= 1);
-            } else {
-                assert(toInt(x) - res <= 1);
-            }
-        }
     }
 
     function test_divi_one(int256 x) public {
@@ -661,6 +632,42 @@ contract Test {
         assert(divu(x, 1) == fromUInt(x));
     }
 
+    function test_muli_gt(int128 x, int256 y) public {
+        int256 res = muli(x, y);
+        emit Value256("muli", res);
+        emit Value("toInt", toIntRoundToZero(x));
+        if (x >= 0) {
+            if (y > 0) {
+                assert(toIntRoundToZero(x) <= res);
+            } else {
+                assert(res <= toIntRoundToZero(x));
+            }
+        } else {
+            if (y > 0) {
+                assert(res <= toIntRoundToZero(x));
+            } else {
+                assert(toIntRoundToZero(x) <= res);
+            }
+        }
+    }
+
+    function test_muli_mulu_one_zero(int128 x) public {
+        // muli(x, 1) = x with some tolerance
+        emit Value("muli(x, 1)", int128(muli(x, 1)));
+        emit Value("toInt(x)", toIntRoundToZero(x));
+        emit Value("x", x);
+        if (x >= ONE || x <= -ONE) {
+            assert(muli(x, 1) <= toIntRoundToZero(x));
+            assert(mulu(x, 1) == toUInt(x));
+        } else {
+            assert(muli(x, 1) == 0);
+            assert(mulu(x, 1) == 0);
+        }
+        assert(muli(x, 0) == 0);
+        assert(mulu(x, 0) == 0);
+    }
+
+    // TODO: FIgure out how to do this for muli
     function mulu_divu(uint256 x, uint256 y) public {
         // can truncate which makes this not strict equality
         uint256 res = mulu(divu(x, y), y) - x;
@@ -670,5 +677,47 @@ contract Test {
         int256 tol = ONE;
 
         assert(-tol <= diff && diff <= tol);
+    }
+
+    function test_exp_taylor(int128 x) public {
+        // 1 - x <= e^-x <= 1 - x + x^2/2 for all x >= 0
+        // Note that we put tolerances of 1 bec neg range is wider
+
+        x = abs(x);
+        int128 expRes = exp(-x);
+        emit Value("x ", x);
+        emit Value("sub(ONE, x) ", sub(ONE, x));
+        emit Value("exp(-x)", expRes);
+        emit Value(
+            "ONE - x + div(mul(x, x), fromInt(2) ",
+            ONE - x + div(mul(x, x), fromInt(2))
+        );
+
+        assert(
+            (sub(ONE, x) <= expRes + 1 &&
+                expRes - 1 <= ONE - x + div(mul(x, x), fromInt(2)))
+        );
+    }
+
+    function test_exp_2x_3x(int128 x) public {
+        // 2^x < e^x < 3^x
+        // Can only check when x > 0 because of pow limitation
+        // Check when x > ONE bec of truncation
+        x = abs(make_outside_lim(x, ONE));
+        uint256 xPos = uint256(uint128(x));
+
+        emit Value("x", x);
+        emit Value256("x", int256(xPos));
+        emit Value("pow(ONE * 2, xPos)", pow(ONE * 2, xPos));
+        emit Value("exp(x)", exp(x));
+        emit Value("pow(ONE * 3, xPos)", pow(ONE * 3, xPos));
+
+        assert(pow(ONE * 2, xPos) <= exp(x) && exp(x) <= pow(ONE * 3, xPos));
+
+        // 2^-x < e^-x < 3^-x
+        assert(
+            inv(pow(ONE * 2, xPos)) <= inv(exp(x)) &&
+                inv(exp(x)) <= inv(pow(ONE * 3, xPos))
+        );
     }
 }
